@@ -59,18 +59,8 @@ public class Server {
         public void run() {
             try {
                 Request request = new Request(clientSocket.getInputStream());
-
-                // Response
-                String body = "<h1>Hello, World</h1>";
-                PrintStream printStream = new PrintStream(clientSocket.getOutputStream());
-                printStream.println("HTTP/1.1 200 OK");
-                printStream.println("Connection: Close");
-                printStream.println("Content-Type: text/html");
-                printStream.println("Content-Length: " + body.length());
-                printStream.println();
-                printStream.println(body);
-                printStream.println();
-                printStream.flush();
+                Response response = new Response(clientSocket.getOutputStream());
+                new FileController(request, response).service();
             } catch (IOException e) {
                 System.err.println("Could not create a Request/Response object");
             }
