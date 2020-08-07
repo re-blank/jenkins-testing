@@ -3,7 +3,6 @@ package com.github.MehrabRahman;
 import static org.junit.Assert.assertEquals;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
@@ -56,6 +55,6 @@ public class RequestTest {
 
     @Test(expected = java.lang.NullPointerException.class)
     public void parseRequestExceptionTest() {
-        Request req = new Request(null);
+        new Request(null);
     }
 }

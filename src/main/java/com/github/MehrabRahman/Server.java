@@ -14,8 +14,18 @@ public class Server {
     public Server(int port) {
         try {
             this.serverSocket = new ServerSocket(port);
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> shutdown()));
         } catch (IOException e) {
             System.err.println("Could not run server on port: " + port);
+        }
+    }
+
+    private void shutdown() {
+        System.out.println("Shutting down the server...");
+        try {
+            this.serverSocket.close();
+        } catch (Exception e) {
+            //TODO: handle exception
         }
     }
 
