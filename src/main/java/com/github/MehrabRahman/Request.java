@@ -36,7 +36,6 @@ public class Request {
             String[] requestLineTokens = requestLine.split(" ");
             this.method = requestLineTokens[0];
             this.path = requestLineTokens[1];
-
             String header;
             while (reader.ready()) {
                 header = reader.readLine();
@@ -66,4 +65,9 @@ public class Request {
     public Map<String, String> getHeaders() {
         return this.headers;
     }
+
+    @Override
+    public String toString() {
+        return "Request [headers=" + headers + ", method=" + method + ", path=" + path + ", reader=" + reader + "]";
+    }    
 }

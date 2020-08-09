@@ -1,7 +1,6 @@
 package com.github.MehrabRahman;
 
 import java.io.IOException;
-import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
@@ -15,14 +14,8 @@ public class Server {
     public Server(int port) {
         try {
             this.serverSocket = new ServerSocket(port);
+            System.out.println("Starting server on port " + port);
             Runtime.getRuntime().addShutdownHook(new Thread(() -> shutdown()));
-            // Runtime.getRuntime().addShutdownHook(new Thread(() -> System.err.println("Shutting down from lambda!")));
-            // Runtime.getRuntime().addShutdownHook(new Thread() {
-            //     @Override
-            //     public void run() {
-            //         System.err.println("Shutting down from anonymous class!");
-            //     }
-            // });
             this.threadPool = Executors.newFixedThreadPool(10);
         } catch (IOException e) {
             System.err.println("Could not run server on port: " + port);
@@ -61,6 +54,9 @@ public class Server {
                 Request request = new Request(clientSocket.getInputStream());
                 Response response = new Response(clientSocket.getOutputStream());
                 new FileController(request, response).service();
+                System.out.println(request);
+                System.out.println(response);
+                response.send();
             } catch (IOException e) {
                 System.err.println("Could not create a Request/Response object");
             }

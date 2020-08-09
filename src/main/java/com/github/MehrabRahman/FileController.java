@@ -1,10 +1,9 @@
 package com.github.MehrabRahman;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 
 public class FileController {
     private Request request;
@@ -16,26 +15,17 @@ public class FileController {
     }
 
     public void service() {
-        String path = request.getPath();
-        InputStream resource = getClass().getResourceAsStream(path);
+        Path path = Paths.get(request.getPath().substring(1));
         try {
-            String MIMEType = Files.probeContentType(Paths.get(path));
-            // BufferedReader fileReader = new BufferedReader(new InputStreamReader(resource));
-            // String fileContent = fileReader.lines().collect(Collectors.joining("\n"));
-            
-    
-            List<String> lines = Files.readAllLines(Paths.get("index.html"));
-            String fileContent = "";
-            for (String line : lines) {
-                fileContent += line;
-            }
-
-            response.setStatus("200", "OK");
+            String MIMEType = Files.probeContentType(path);
+            response.setStatus("200 OK");
             response.setHeader("Content-Type", MIMEType);
-            response.setBody(fileContent);
-            response.send();
+            response.setBody(Files.readAllBytes(path));
         } catch (IOException e) {
-            System.err.println("Could not parse file type!");
+            System.err.println("File not found");
+            response.setStatus("404 File Not Found");
+            response.setHeader("Content-Type", "text/html");
+            response.setBody("<h1>File Not Found!</h1>".getBytes());
         }
     }
 }
