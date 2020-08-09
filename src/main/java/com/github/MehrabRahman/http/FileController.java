@@ -1,26 +1,24 @@
-package com.github.MehrabRahman;
+package com.github.MehrabRahman.http;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class FileController {
-    private Request request;
-    private Response response;
+public class FileController implements Controller {
 
-    public FileController(Request request, Response response) {
-        this.request = request;
-        this.response = response;
-    }
+    public void service(Request request, Response response) {
+        String path = request.getPath();
+        if ("/".equals(path)) {
+            path = "/index.html";
+        }
 
-    public void service() {
-        Path path = Paths.get(request.getPath().substring(1));
+        Path file = Paths.get(path.substring(1));
         try {
-            String MIMEType = Files.probeContentType(path);
+            String MIMEType = Files.probeContentType(file);
             response.setStatus("200 OK");
             response.setHeader("Content-Type", MIMEType);
-            response.setBody(Files.readAllBytes(path));
+            response.setBody(Files.readAllBytes(file));
         } catch (IOException e) {
             System.err.println("File not found");
             response.setStatus("404 File Not Found");

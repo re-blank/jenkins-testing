@@ -1,8 +1,10 @@
-package com.github.MehrabRahman;
+package com.github.MehrabRahman.http;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -10,13 +12,15 @@ public class Server {
     private ServerSocket serverSocket;
     private Socket clientSocket;
     private ExecutorService threadPool;
+    public static Map<String, Controller> container = new ConcurrentHashMap<>();
 
     public Server(int port) {
         try {
-            this.serverSocket = new ServerSocket(port);
             System.out.println("Starting server on port " + port);
+            serverSocket = new ServerSocket(port);
+            threadPool = Executors.newFixedThreadPool(10);
+            Server.container.put("/", new FileController());
             Runtime.getRuntime().addShutdownHook(new Thread(() -> shutdown()));
-            this.threadPool = Executors.newFixedThreadPool(10);
         } catch (IOException e) {
             System.err.println("Could not run server on port: " + port);
         }
@@ -25,7 +29,8 @@ public class Server {
     private void shutdown() {
         System.out.println("Shutting down the server...");
         try {
-            this.serverSocket.close();
+            serverSocket.close();
+            threadPool.shutdown();
         } catch (Exception e) {
             System.err.println("Failed to shutdown server!");
         }
@@ -33,16 +38,21 @@ public class Server {
 
     public void listen() {
         try {
-            while ((this.clientSocket = serverSocket.accept()) != null) {
-                this.threadPool.execute(new Handler(clientSocket));
+            while ((clientSocket = serverSocket.accept()) != null) {
+                clientSocket.setSoTimeout(10 * 1000);
+                threadPool.execute(new Handler(clientSocket));
             }
         } catch (IOException e) {
             System.err.println("Could not create client instance");
         }
     }
+
+    public void addController(String path, Controller controller) {
+        Server.container.put(path, controller);
+    }
     
     private class Handler implements Runnable {
-        private Socket clientSocket;
+        private final Socket clientSocket;
 
         private Handler(Socket clientSocket) {
             this.clientSocket = clientSocket;
@@ -53,9 +63,11 @@ public class Server {
             try {
                 Request request = new Request(clientSocket.getInputStream());
                 Response response = new Response(clientSocket.getOutputStream());
-                new FileController(request, response).service();
-                System.out.println(request);
-                System.out.println(response);
+                Controller controller = Server.container.get(request.getPath());
+                if (controller == null) {
+                    controller = Server.container.get("/");
+                }
+                controller.service(request, response);
                 response.send();
             } catch (IOException e) {
                 System.err.println("Could not create a Request/Response object");

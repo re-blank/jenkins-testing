@@ -1,4 +1,4 @@
-package com.github.MehrabRahman;
+package com.github.MehrabRahman.http;
 
 import java.io.IOException;
 import java.io.OutputStream;

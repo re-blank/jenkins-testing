@@ -1,4 +1,4 @@
-package com.github.MehrabRahman;
+package com.github.MehrabRahman.http;
 
 import static org.junit.Assert.assertEquals;
 
