@@ -20,6 +20,7 @@ public class Request {
     private String method;
     private String path;
     private Map<String, String> headers;
+    private Map<String, String> parameters;
 
     /**
      * Request constructor requires an InputStream from a Socket. It will construct a HashMap and then call a parse function.
@@ -27,6 +28,7 @@ public class Request {
     public Request(InputStream input) {
         this.reader = new BufferedReader(new InputStreamReader(input));
         this.headers = new HashMap<>();
+        this.parameters = new HashMap<>();
         parse();
     }
 
@@ -36,6 +38,17 @@ public class Request {
             String[] requestLineTokens = requestLine.split(" ");
             this.method = requestLineTokens[0];
             this.path = requestLineTokens[1];
+
+            // query string parsing
+            if (path.contains("?")) {
+                String[] splitUri = path.split("\\?");
+                path = splitUri[0];
+                for (String parameter : splitUri[1].split("&")) {
+                    int separator = parameter.indexOf('=');
+                    parameters.put(parameter.substring(0, separator), parameter.substring(separator + 1));
+                }
+            }
+
             String header;
             while (reader.ready()) {
                 header = reader.readLine();
@@ -66,8 +79,15 @@ public class Request {
         return this.headers;
     }
 
+    public String getParameter(String key) {
+        return this.parameters.get(key);
+    }
+
     @Override
     public String toString() {
-        return "Request [headers=" + headers + ", method=" + method + ", path=" + path + ", reader=" + reader + "]";
-    }    
+        return "Request [headers=" + headers + ", method=" + method + ", parameters=" + parameters + ", path=" + path
+                + ", reader=" + reader + "]";
+    }
+
+    
 }

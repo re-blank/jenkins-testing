@@ -50,7 +50,7 @@ public class Server {
     public void addController(String path, Controller controller) {
         Server.container.put(path, controller);
     }
-    
+
     private class Handler implements Runnable {
         private final Socket clientSocket;
 

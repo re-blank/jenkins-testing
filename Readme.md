@@ -7,10 +7,16 @@ A poor man's implementation of an http server using only Java SE 1.8
         - [x] Parse Request Line (i.e. GET / HTTP/1.1)
         - [x] Parse Headers (Host: localhost:8080)
     - [x] Respond with HTTP response
-        - [ ] Respond with HTML welcome page
+        - [x] Respond with HTML welcome page
 
 ## Usage
 ```bash
+# Build docker image for database
+docker build -t httpdb db/.
+
+# Run database
+docker run -p 5432:5432 --rm -it httpdb
+
 # Compile
 mvn compile -q
 
