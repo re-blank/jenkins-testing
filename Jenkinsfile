@@ -7,26 +7,56 @@ pipeline {
     }
 
     stages {
-        stage('Build') {
+        stage('Compile') {
             steps {
                 // Get some code from a GitHub repository
-                git 'https://github.com/200803-java-devops/http-server'
+                git 'https://github.com/re-blank/jenkins-testing.git'
 
                 // Run Maven on a Unix agent.
-                sh "mvn -Dmaven.test.failure.ignore=true clean package"
+                sh "mvn clean compile"
 
                 // To run Maven on a Windows agent, use
                 // bat "mvn -Dmaven.test.failure.ignore=true clean package"
             }
-
-            post {
-                // If Maven was able to run the tests, even if some of the test
-                // failed, record the test results and archive the jar file.
-                success {
-                    junit '**/target/surefire-reports/TEST-*.xml'
-                    archiveArtifacts 'target/*.jar'
+            post{
+                failure{
+                    error "Failed to compile."
+                }
+            }
+        }
+        stage('Test')
+        {
+            steps {
+                // Run Maven on a Unix agent.
+                sh "mvn -Dmaven.test.failure.ignore=false test"
+            }
+            post{
+                failure{
+                    error "One or more tests failed."
+                }
+            }
+        }
+        stage('Package')
+        {
+            steps {
+                sh "mvn -DskipTests=true package"
+            }
+            post{
+                failure{
+                    error "Failed to package the project"
                 }
             }
         }
     }
+    post {
+                // If Maven was able to run the tests, even if some of the test
+                // failed, record the test results and archive the jar file.
+                always {
+                    junit '**/target/surefire-reports/TEST-*.xml'
+                    archiveArtifacts 'target/*.jar'
+                }
+                
+                
+        }
 }
+
